@@ -1,0 +1,12 @@
+[project]
+name = "dbt-sample-projects"
+version = "0.0.0"
+description = "Shared Python environment for all dbt sample projects in this repo"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "dbt-core==1.11.10",
+    "dbt-duckdb==1.10.1",
+    "metricflow==0.211.0",
+    "dbt-mcp==1.19.1",
+    "databao[cli]==0.5.1.dev2",
+]

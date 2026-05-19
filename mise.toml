@@ -1,0 +1,32 @@
+# Shared toolchain for all dbt sample projects in this repo.
+# mise walks up the directory tree, so subprojects inherit this config automatically.
+
+[tools]
+python = "3.12"
+uv = "latest"
+duckdb = "1.5"
+
+[settings]
+python.uv_venv_auto = true
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+[tasks.deps]
+description = "Install or refresh Python dependencies with uv"
+run = "uv sync"
+
+[tasks.lock]
+description = "Refresh uv.lock after changing pyproject.toml"
+run = "uv lock"
+
+[tasks.setup]
+description = "Install mise tools, create .venv, and sync Python packages"
+run = [
+  "mise install",
+  "mise run deps",
+]
+
+[tasks.dbt-version]
+description = "Show dbt, MetricFlow, and DuckDB versions"
+run = "dbt --version && mf --version && duckdb --version"
