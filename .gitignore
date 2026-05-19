@@ -1,0 +1,34 @@
+# dbt build output
+**/target/
+**/dbt_packages/
+**/logs/
+
+# DuckDB databases (regenerate locally)
+*.duckdb
+*.duckdb.wal
+
+# Python
+**/.venv/
+**/venv/
+**/__pycache__/
+*.pyc
+.python-version
+
+# dbt local user config
+**/.user.yml
+
+# Node (Semantic Layer course includes Evidence reports)
+**/node_modules/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Secrets
+.env
+.env.*
+!.env*.example
+!**/.env.template
+!**/.env.local.example
