@@ -1,0 +1,56 @@
+semantic_models:
+  - name: fct_order_items
+    description: Order items fact at order-item grain with product, category, and high-value order flag.
+    model: ref('mart_order_items_enriched')
+    entities:
+      - name: order_item
+        type: primary
+        expr: order_item_id
+      - name: order
+        type: foreign
+        expr: order_id
+      - name: product
+        type: foreign
+        expr: product_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: category
+        type: categorical
+      - name: product_name
+        type: categorical
+      - name: is_high_value_order
+        type: categorical
+    measures:
+      - name: item_revenue
+        description: Sum of line totals in dollars.
+        agg: sum
+        expr: line_total
+        agg_time_dimension: order_date
+      - name: item_count
+        description: Count of distinct order items.
+        agg: count_distinct
+        expr: order_item_id
+        agg_time_dimension: order_date
+      - name: high_value_item_revenue
+        description: Revenue from items in orders above the mean order amount.
+        agg: sum
+        expr: "CASE WHEN is_high_value_order THEN line_total END"
+        agg_time_dimension: order_date
+
+metrics:
+  - name: monthly_category_revenue
+    label: Monthly Category Revenue
+    description: Total revenue by product category per month.
+    type: simple
+    type_params:
+      measure: item_revenue
+
+  - name: high_value_product_revenue
+    label: High Value Product Revenue
+    description: Revenue from products sold in orders above the mean order amount.
+    type: simple
+    type_params:
+      measure: high_value_item_revenue

@@ -1,0 +1,58 @@
+semantic_models:
+  - name: fct_sales
+    description: Sales fact at order grain, combining system 1 and system 2.
+    model: ref('fct_sales')
+    entities:
+      - name: order
+        type: primary
+        expr: sales_key
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: source_system
+        type: categorical
+      - name: referral_code
+        type: categorical
+      - name: device_type
+        type: categorical
+    measures:
+      - name: total_revenue
+        description: Sum of order amounts in dollars.
+        agg: sum
+        expr: amount
+        agg_time_dimension: order_date
+      - name: order_count
+        description: Count of distinct orders.
+        agg: count_distinct
+        expr: sales_key
+        agg_time_dimension: order_date
+
+metrics:
+  - name: total_revenue
+    label: Total Revenue
+    description: Total revenue generated from all orders in dollars.
+    type: simple
+    type_params:
+      measure: total_revenue
+
+  - name: order_count
+    label: Order Count
+    description: Total number of distinct orders.
+    type: simple
+    type_params:
+      measure: order_count
+
+  - name: avg_order_value
+    label: Average Order Value
+    description: Average revenue per order.
+    type: derived
+    type_params:
+      expr: total_revenue / order_count
+      metrics:
+        - name: total_revenue
+        - name: order_count

@@ -1,0 +1,27 @@
+semantic_models:
+  - name: dim_customers
+    description: Customer dimension with signup dates for new customer analysis.
+    model: ref('dim_customers')
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_id
+    dimensions:
+      - name: signup_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: new_customer_count
+        description: Count of distinct customers by signup date.
+        agg: count_distinct
+        expr: customer_id
+        agg_time_dimension: signup_date
+
+metrics:
+  - name: monthly_new_customers
+    label: Monthly New Customers
+    description: Number of new customers who signed up each month.
+    type: simple
+    type_params:
+      measure: new_customer_count

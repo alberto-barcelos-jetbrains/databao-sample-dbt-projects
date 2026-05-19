@@ -3,9 +3,12 @@ version: 2
 models:
   - name: util_date_spine
     description: "Date dimension spanning 2024, with year/month/quarter/weekend fields."
+    time_spine:
+      standard_granularity_column: date_day
     columns:
       - name: date_day
         description: "Primary key — one row per calendar day."
+        granularity: day
         data_tests:
           - unique
           - not_null

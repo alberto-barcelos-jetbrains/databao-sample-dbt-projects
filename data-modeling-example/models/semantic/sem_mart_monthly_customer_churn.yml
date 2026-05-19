@@ -1,0 +1,30 @@
+semantic_models:
+  - name: mart_monthly_customer_churn
+    description: Monthly churn flags — one row per (customer, month). A customer churns in month N if they ordered in N-1 but not in N.
+    model: ref('mart_monthly_customer_churn')
+    entities:
+      - name: customer_month
+        type: primary
+        expr: "customer_id::varchar || '_' || month_date::varchar"
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: month_date
+        type: time
+        type_params:
+          time_granularity: month
+    measures:
+      - name: churned_customer_count
+        description: Customers who were active last month but placed no orders this month.
+        agg: sum
+        expr: is_churned_this_month
+        agg_time_dimension: month_date
+
+metrics:
+  - name: monthly_customer_churn
+    label: Monthly Customer Churn
+    description: Count of customers who churned each month (active previous month, no orders this month).
+    type: simple
+    type_params:
+      measure: churned_customer_count
