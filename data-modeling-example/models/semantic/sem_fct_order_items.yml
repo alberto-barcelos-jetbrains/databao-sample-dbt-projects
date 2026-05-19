@@ -39,6 +39,16 @@ semantic_models:
         agg: sum
         expr: "CASE WHEN is_high_value_order THEN line_total END"
         agg_time_dimension: order_date
+      - name: total_quantity
+        description: Sum of item quantities across all order line items.
+        agg: sum
+        expr: quantity
+        agg_time_dimension: order_date
+      - name: order_count_items
+        description: Count of distinct orders containing at least one line item.
+        agg: count_distinct
+        expr: order_id
+        agg_time_dimension: order_date
 
 metrics:
   - name: monthly_category_revenue
@@ -54,3 +64,27 @@ metrics:
     type: simple
     type_params:
       measure: high_value_item_revenue
+
+  - name: total_quantity_sold
+    label: Total Quantity Sold
+    description: Total number of items sold across all orders.
+    type: simple
+    type_params:
+      measure: total_quantity
+
+  - name: order_count_by_items
+    label: Order Count (by Items)
+    description: Number of distinct orders that contain at least one line item.
+    type: simple
+    type_params:
+      measure: order_count_items
+
+  - name: avg_basket_size
+    label: Average Basket Size
+    description: Average number of items per order, groupable by product category.
+    type: derived
+    type_params:
+      expr: total_quantity_sold / order_count_by_items
+      metrics:
+        - name: total_quantity_sold
+        - name: order_count_by_items
