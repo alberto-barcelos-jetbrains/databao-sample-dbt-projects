@@ -13,3 +13,4 @@ How many customers churned each month?,mf query --metrics monthly_customer_churn
 What percentage of customers placed more than one order each month?,mf query --metrics pct_repeat_buyers_monthly --group-by metric_time__month,pct_repeat_buyers_monthly,repeat_buyers_monthly / active_customers_monthly * 100
 What is the overall repeat purchase rate across all customers?,mf query --metrics pct_repeat_buyers_monthly,pct_repeat_buyers_monthly,repeat_buyers_monthly / active_customers_monthly * 100
 How has the repeat purchase rate trended over time?,mf query --metrics pct_repeat_buyers_monthly --group-by metric_time__month,pct_repeat_buyers_monthly,repeat_buyers_monthly / active_customers_monthly * 100
+What is total revenue by source system each month?,mf query --metrics total_revenue --group-by order__source_system metric_time__month,total_revenue,SUM(amount)
