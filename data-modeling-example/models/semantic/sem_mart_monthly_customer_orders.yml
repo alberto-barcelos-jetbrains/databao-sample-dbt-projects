@@ -1,0 +1,52 @@
+semantic_models:
+  - name: mart_monthly_customer_orders
+    description: One row per (customer, month) capturing how many orders each customer placed that month and whether they are a repeat buyer.
+    model: ref('mart_monthly_customer_orders')
+    entities:
+      - name: customer_month_orders
+        type: primary
+        expr: "customer_id::varchar || '_' || order_month::varchar"
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: order_month
+        type: time
+        type_params:
+          time_granularity: month
+    measures:
+      - name: active_customers_count
+        description: Distinct customers who placed at least one order in the month.
+        agg: count_distinct
+        expr: customer_id
+        agg_time_dimension: order_month
+      - name: repeat_buyers_count
+        description: Customers who placed more than one order in the month.
+        agg: sum
+        expr: is_repeat_buyer
+        agg_time_dimension: order_month
+
+metrics:
+  - name: active_customers_monthly
+    label: Active Customers Monthly
+    description: Number of distinct customers who placed at least one order each month.
+    type: simple
+    type_params:
+      measure: active_customers_count
+
+  - name: repeat_buyers_monthly
+    label: Repeat Buyers Monthly
+    description: Number of customers who placed more than one order in a given month.
+    type: simple
+    type_params:
+      measure: repeat_buyers_count
+
+  - name: pct_repeat_buyers_monthly
+    label: Pct Repeat Buyers Monthly
+    description: Percentage of active customers who placed more than one order in a given month.
+    type: derived
+    type_params:
+      expr: "repeat_buyers_monthly * 100.0 / active_customers_monthly"
+      metrics:
+        - name: repeat_buyers_monthly
+        - name: active_customers_monthly

@@ -10,3 +10,6 @@ How much revenue does each customer cohort generate per month?,mf query --metric
 How does revenue compare between source systems each month?,mf query --metrics total_revenue --group-by metric_time__month --group-by order__source_system,total_revenue,SUM(amount)
 Which products generate the most revenue from high-value orders?,mf query --metrics high_value_product_revenue --group-by metric_time__month --group-by order_item__product_name,high_value_product_revenue,SUM(CASE WHEN is_high_value_order THEN line_total END)
 How many customers churned each month?,mf query --metrics monthly_customer_churn --group-by metric_time__month,monthly_customer_churn,SUM(is_churned_this_month)
+What percentage of customers placed more than one order each month?,mf query --metrics pct_repeat_buyers_monthly --group-by metric_time__month,pct_repeat_buyers_monthly,repeat_buyers_monthly / active_customers_monthly * 100
+What is the overall repeat purchase rate across all customers?,mf query --metrics pct_repeat_buyers_monthly,pct_repeat_buyers_monthly,repeat_buyers_monthly / active_customers_monthly * 100
+How has the repeat purchase rate trended over time?,mf query --metrics pct_repeat_buyers_monthly --group-by metric_time__month,pct_repeat_buyers_monthly,repeat_buyers_monthly / active_customers_monthly * 100
