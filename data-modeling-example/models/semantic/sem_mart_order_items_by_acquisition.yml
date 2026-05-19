@@ -1,0 +1,94 @@
+semantic_models:
+  - name: mart_order_items_by_acquisition
+    description: >
+      Order items enriched with customer acquisition type (referral vs organic),
+      enabling comparison of high-value item purchasing behavior across channels.
+    model: ref('mart_order_items_by_acquisition')
+    entities:
+      - name: order_item_acq
+        type: primary
+        expr: order_item_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: category
+        type: categorical
+      - name: product_name
+        type: categorical
+      - name: is_high_value_order
+        type: categorical
+      - name: acquisition_type
+        type: categorical
+        description: "Customer acquisition channel: 'referral' if order came via referral code, 'organic' otherwise."
+      - name: referral_code
+        type: categorical
+        description: The referral code used on the order, or 'none' for organic orders.
+    measures:
+      - name: acq_item_revenue
+        description: Total revenue from all order line items.
+        agg: sum
+        expr: line_total
+        agg_time_dimension: order_date
+      - name: acq_high_value_item_revenue
+        description: Revenue from items in high-value orders (orders above mean order amount).
+        agg: sum
+        expr: "CASE WHEN is_high_value_order THEN line_total ELSE 0 END"
+        agg_time_dimension: order_date
+      - name: acq_item_count
+        description: Total count of order items.
+        agg: sum
+        expr: "1"
+        agg_time_dimension: order_date
+      - name: acq_high_value_item_count
+        description: Count of items in high-value orders.
+        agg: sum
+        expr: "CASE WHEN is_high_value_order THEN 1 ELSE 0 END"
+        agg_time_dimension: order_date
+
+metrics:
+  - name: high_value_item_revenue_by_acquisition
+    label: High Value Item Revenue by Acquisition
+    description: >
+      Revenue from items in high-value orders (above mean order value),
+      segmented by acquisition type (referral vs organic).
+    type: simple
+    type_params:
+      measure: acq_high_value_item_revenue
+
+  - name: total_item_revenue_by_acquisition
+    label: Total Item Revenue by Acquisition
+    description: Total item-level revenue segmented by acquisition type.
+    type: simple
+    type_params:
+      measure: acq_item_revenue
+
+  - name: high_value_item_count_by_acquisition
+    label: High Value Item Count by Acquisition
+    description: Count of order items purchased in high-value orders, segmented by acquisition type.
+    type: simple
+    type_params:
+      measure: acq_high_value_item_count
+
+  - name: total_item_count_by_acquisition
+    label: Total Item Count by Acquisition
+    description: Total count of order items segmented by acquisition type.
+    type: simple
+    type_params:
+      measure: acq_item_count
+
+  - name: pct_high_value_items_by_acquisition
+    label: Pct High Value Items by Acquisition
+    description: >
+      Percentage of items purchased in high-value orders, by acquisition type.
+      Answers whether referral customers buy proportionally more high-value items than organic customers.
+    type: derived
+    type_params:
+      expr: "high_value_item_count_by_acquisition / total_item_count_by_acquisition"
+      metrics:
+        - name: high_value_item_count_by_acquisition
+        - name: total_item_count_by_acquisition

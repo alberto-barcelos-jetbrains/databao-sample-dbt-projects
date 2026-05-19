@@ -16,3 +16,5 @@ How has the repeat purchase rate trended over time?,mf query --metrics pct_repea
 What is total revenue by source system each month?,mf query --metrics total_revenue --group-by order__source_system metric_time__month,total_revenue,SUM(amount)
 How many customers churned each quarter?,mf query --metrics monthly_customer_churn --group-by metric_time__quarter,monthly_customer_churn,SUM(is_churned_this_month)
 What is the revenue lift from referral codes vs organic each month?,mf query --metrics total_revenue --group-by order__referral_code metric_time__month,total_revenue,SUM(amount)
+Do referral-acquired customers buy more high-value items than organic customers?,mf query --metrics pct_high_value_items_by_acquisition --group-by order_item_acq__acquisition_type,pct_high_value_items_by_acquisition,high_value_item_count / total_item_count
+Which product categories have the most orders?,mf query --metrics order_count_by_items --group-by order_item__category,order_count_by_items,COUNT_DISTINCT(order_id)
