@@ -1,0 +1,11 @@
+question,mf_query,metric,formula
+What is the total revenue generated per month across all transactions?,mf query --metrics total_revenue --group-by metric_time__month --order metric_time__month,total_revenue,SUM(quantity * unit_sale_price)
+How many units were sold per product line each month?,mf query --metrics units_sold --group-by sale__product_line metric_time__month --order metric_time__month,units_sold,SUM(quantity)
+What is the average discount rate applied to products over time?,mf query --metrics avg_discount_rate --group-by metric_time__month --order metric_time__month,avg_discount_rate,SUM(quantity * (unit_price - unit_sale_price)) / SUM(quantity * unit_price)
+How many distinct orders were placed per order method (Web Phone Direct) each month?,mf query --metrics order_count --group-by sale__order_method_type metric_time__month --order metric_time__month,order_count,COUNT(DISTINCT fct_sales_sk)
+What is the total revenue contributed by each retailer country per month?,mf query --metrics total_revenue --group-by sale__retailer_country metric_time__month --order metric_time__month,total_revenue,SUM(quantity * unit_sale_price)
+What is the total gross (pre-discount) revenue per product line each month?,mf query --metrics gross_revenue --group-by sale__product_line metric_time__month --order metric_time__month,gross_revenue,SUM(quantity * unit_price)
+How much absolute discount value was given per order method each month?,mf query --metrics total_discount_amount --group-by sale__order_method_type metric_time__month --order metric_time__month,total_discount_amount,SUM(quantity * (unit_price - unit_sale_price))
+What is the average quantity per transaction by retailer type each month?,mf query --metrics avg_order_quantity --group-by sale__retailer_type metric_time__month --order metric_time__month,avg_order_quantity,AVG(quantity)
+How many distinct products were sold per product line each month?,mf query --metrics distinct_products_sold --group-by sale__product_line metric_time__month --order metric_time__month,distinct_products_sold,COUNT(DISTINCT product_number)
+How many distinct active retailers placed orders each month?,mf query --metrics active_retailer_count --group-by metric_time__month --order metric_time__month,active_retailer_count,COUNT(DISTINCT retailer_code)
