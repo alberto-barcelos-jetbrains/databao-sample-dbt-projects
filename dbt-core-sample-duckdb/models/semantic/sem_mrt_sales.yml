@@ -1,0 +1,167 @@
+version: 2
+
+semantic_models:
+  - name: t_mrt_sales
+    description: >
+      Semantic model over the flattened sales mart, combining transactions with
+      product, retailer, and order-method attributes. Supports revenue, volume,
+      and count metrics sliced by time, product, retailer, and channel.
+    model: ref('t_mrt_sales')
+    entities:
+      - name: sale
+        type: primary
+        expr: fct_sales_sk
+    dimensions:
+      - name: transaction_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: transaction_date
+      - name: order_method_type
+        type: categorical
+        description: Channel used to place the order (e.g. Web, Direct).
+      - name: product_line
+        type: categorical
+        description: High-level product category line.
+      - name: product_type
+        type: categorical
+        description: Product classification within its line.
+      - name: product_name
+        type: categorical
+        expr: product
+        description: Product display name.
+      - name: product_brand
+        type: categorical
+        description: Brand under which the product is sold.
+      - name: product_color
+        type: categorical
+        description: Product colour variant.
+      - name: retailer_name
+        type: categorical
+        description: Name of the retailer.
+      - name: retailer_country
+        type: categorical
+        description: Country where the retailer operates.
+      - name: retailer_type
+        type: categorical
+        description: Classification of the retailer (e.g. Online, Physical).
+    measures:
+      - name: revenue
+        description: Sum of sale price multiplied by quantity for each transaction line.
+        agg: sum
+        expr: quantity * unit_sale_price
+        agg_time_dimension: transaction_date
+      - name: quantity_sold
+        description: Total number of units sold.
+        agg: sum
+        expr: quantity
+        agg_time_dimension: transaction_date
+      - name: transaction_count
+        description: Count of distinct sales transactions.
+        agg: count_distinct
+        expr: fct_sales_sk
+        agg_time_dimension: transaction_date
+      - name: gross_revenue_amount
+        description: Sum of list price multiplied by quantity (pre-discount revenue).
+        agg: sum
+        expr: quantity * unit_price
+        agg_time_dimension: transaction_date
+      - name: discount_amount
+        description: Sum of discount value given (list price minus sale price, times quantity).
+        agg: sum
+        expr: quantity * (unit_price - unit_sale_price)
+        agg_time_dimension: transaction_date
+      - name: avg_quantity
+        description: Average quantity per transaction line.
+        agg: average
+        expr: quantity
+        agg_time_dimension: transaction_date
+      - name: distinct_products
+        description: Count of distinct product numbers sold.
+        agg: count_distinct
+        expr: product_number
+        agg_time_dimension: transaction_date
+      - name: distinct_retailers
+        description: Count of distinct retailer codes that placed orders.
+        agg: count_distinct
+        expr: retailer_code
+        agg_time_dimension: transaction_date
+      - name: discounted_order_quantity
+        description: Average quantity per transaction line where a discount was applied (unit_sale_price < unit_price).
+        agg: average
+        expr: "CASE WHEN unit_price > unit_sale_price THEN quantity END"
+        agg_time_dimension: transaction_date
+
+metrics:
+  - name: total_revenue
+    description: Total revenue across all sales transactions (quantity × unit sale price).
+    type: simple
+    label: Total Revenue
+    type_params:
+      measure:
+        name: revenue
+  - name: units_sold
+    description: Total units sold across all transactions.
+    type: simple
+    label: Units Sold
+    type_params:
+      measure:
+        name: quantity_sold
+  - name: avg_discount_rate
+    description: Ratio of total discount amount to gross revenue — overall discount rate.
+    type: ratio
+    label: Average Discount Rate
+    type_params:
+      numerator:
+        name: total_discount_amount
+      denominator:
+        name: gross_revenue
+  - name: order_count
+    description: Count of distinct orders, sliceable by order method channel.
+    type: simple
+    label: Order Count
+    type_params:
+      measure:
+        name: transaction_count
+  - name: gross_revenue
+    description: Total pre-discount revenue (quantity × list price).
+    type: simple
+    label: Gross Revenue
+    type_params:
+      measure:
+        name: gross_revenue_amount
+  - name: total_discount_amount
+    description: Total absolute discount value given across all transactions.
+    type: simple
+    label: Total Discount Amount
+    type_params:
+      measure:
+        name: discount_amount
+  - name: avg_order_quantity
+    description: Average quantity per transaction line.
+    type: simple
+    label: Avg Order Quantity
+    type_params:
+      measure:
+        name: avg_quantity
+  - name: distinct_products_sold
+    description: Number of distinct products sold.
+    type: simple
+    label: Distinct Products Sold
+    type_params:
+      measure:
+        name: distinct_products
+  - name: active_retailer_count
+    description: Number of distinct retailers that placed at least one order.
+    type: simple
+    label: Active Retailer Count
+    type_params:
+      measure:
+        name: distinct_retailers
+  - name: avg_quantity_discounted_orders
+    description: Average order quantity for transactions where a discount was applied.
+    type: simple
+    label: Avg Quantity (Discounted Orders)
+    type_params:
+      measure:
+        name: discounted_order_quantity
