@@ -186,7 +186,7 @@ What's next?
 
 **Feedback**
 
-- When no upstream remote is detected, proactively offer to initialize a GitHub repo — good pattern, keep it. In the last version I did not see it. 
+- When no upstream remote is detected, proactively offer to initialize a GitHub repo and explain why. In the last version I did not see this option anymore. This is valuable given it's expected for deploy. 
 
 ---
 
@@ -195,55 +195,68 @@ What's next?
 ![](https://img.shields.io/badge/-Nice_to_have-0075CA)
 
 
-```
+```bash
+● Bash(echo "${DATABAO_WEB_URL:-https://databao-platform.labs.jb.gg}")
+  ⎿  https://databao-platform.labs.jb.gg
+
 ● [ok] Everything is pushed.
 
   Open this URL in your browser to deploy:
+
   https://databao-platform.labs.jb.gg/import
 
-  Repo: https://github.com/albertoprb/test-shopify (private). Coverage: 10/10 metrics pass
+  ---
+  Coverage: 19 questions / 26 metrics / push-ready. Two broken CSV entries (rows 14 & 16) have malformed mf_query args — worth fixing after deploy
+  if the Slack bot surfaces those questions.
 ```
 
 **Feedback**
 
-- Too many URLs — user loses focus on the call to action
-- Ideal output: one link, one action, goal-oriented copy. Example:
-
-  > All changes deployed. [Import your project to start asking questions in Slack →](https://databao-platform.labs.jb.gg/import)
-
-- Drop the repo URL from this screen — it's noise at this stage
-- Render the link as Markdown (hyperlink text, not raw URL)
+- Clearer call to action: "Finish deployment in the Databao web console: https://databao-platform.labs.jb.gg/import"
 
 ---
 
 ## Repeat Deploy Prompt
 
-```
-● ┌────────────────┬───────────────────────────────────┐
-  │ Project status │               Value               │
-  ├────────────────┼───────────────────────────────────┤
-  │ Semantic layer │ 5 models / metrics defined inline │
-  │ Test coverage  │ 10 questions  →  push-ready       │
-  │ Working tree   │ logs only (gitignored noise)      │
-  └────────────────┴───────────────────────────────────┘
+![](https://img.shields.io/badge/-Nice_to_have-0075CA)
 
-  10 questions covered. Deploy now?
+```bash
+● Project status
 
-❯ 1. Deploy       — Open web console to deploy what we have
-  2. Keep building — Add a question, describe a metric, or test how I'd answer something
+  ┌────────────────┬───────────────────────────────────────────────────────────────┐
+  │ Project status │                             Value                             │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ Semantic layer │ 7 models / 19 metrics                                         │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ Test coverage  │ 19 questions → push-ready                                     │
+  ├────────────────┼───────────────────────────────────────────────────────────────┤
+  │ Working tree   │ 1 uncommitted file (feedback.md, unrelated to semantic layer) │
+  └────────────────┴───────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+ ☐ What next?
+
+You have 19 questions covered across 19 metrics. Deploy now?
+
+❯ 1. Deploy
+     Open the web console to deploy
+  2. Keep building
+     Add a question, describe a metric, or test how I'd answer something
   3. Type something.
+────────────────────────────────────────────────────────────────────────────────────────────────────
   4. Chat about this
 ```
 
 **Feedback**
 
 - After a successful deploy with no new changes, "Deploy" should not be the first option
-- Detect state: if nothing changed since last deploy, skip the deploy prompt entirely and drop the user straight into the build loop
-- Default first option should be "Keep building" — deploying again immediately is almost never what the user wants
+- Detect state: if nothing changed since last deploy, skip the deploy prompt entirely and make the Keep building loop the first action
 
 ---
 
 ## No dbt Project Detected
+
+![](https://img.shields.io/badge/-Important-D93F0B) 
+
 
 ```bash
 ❯ databao
@@ -253,11 +266,13 @@ Error: No dbt project found at /home/Alberto.Barcelos/Projects/jetbrains/sample-
 **Feedback**
 
 - Replace the raw error with a friendly message:
-  > "I could not detect a dbt project in this folder. Please run databao at the root of a dbt project."
+  > "I could not detect a dbt project in this folder. Please run databao at the root folder of a dbt project."
 
 ---
 
 ## Startup Output Order
+
+![](https://img.shields.io/badge/-Nice_to_have-0075CA)
 
 **Current** — auth messages appear before the splash screen:
 
@@ -826,3 +841,40 @@ What's next for cycle #3?
   Coverage: 19 questions · 14 of 18 metrics covered (4 uncovered)
   ```
 - Ideally list the uncovered metrics so the user knows what's still missing
+
+---
+
+## Bug: mf query --group-by Malformed
+
+![](https://img.shields.io/badge/-Blocker_for_Release_1-B60205)
+
+```
+│ 14  │ What is total revenue by source system each month?               │ total_revenue │ Broken  │ mf query failed: Usage: mf query [OPTIONS] │
+│ 16  │ What is the revenue lift from referral codes vs organic each     │ total_revenue │ Broken  │ mf query failed: Usage: mf query [OPTIONS] │
+│     │ month?                                                           │               │         │                                            │
+```
+
+**Feedback**
+
+- Generated `mf query` commands use space-separated `--group-by` args instead of repeated flags
+- Wrong: `--group-by metric_time source_system`
+- Right: `--group-by metric_time --group-by source_system`
+- This is a codegen bug — any multi-dimension query will break until fixed
+
+---
+
+## "Fix gaps / Run Stage 3" — Clarify Description
+
+![](https://img.shields.io/badge/-Blocker_for_Release_1-B60205)
+
+```
+❯ 2. Fix gaps
+     Run Stage 3 on each broken row
+```
+
+**Feedback**
+
+- "Run Stage 3" is opaque — users don't know what Stage 3 is or what it will do
+- Replace with plain language describing the action and scope, e.g.:
+  - "Attempt to auto-fix each broken test"
+  - "Re-run metric resolution for failed rows"
