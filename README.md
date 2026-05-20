@@ -6,19 +6,44 @@ A curated collection of **medium-complexity dbt projects** for testing agentic w
 
 ## Quick start
 
-Each subfolder is an independent dbt project. From a project directory:
+### One-time setup (repository root)
+
+This repo uses [mise](https://mise.jdx.dev/) and [uv](https://docs.astral.sh/uv/) for a **single shared environment** (Python 3.12, dbt Core 1.11, dbt-duckdb, MetricFlow, DuckDB CLI). All subprojects inherit it automatically when you work inside any folder under this tree.
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install dbt-duckdb
-# For semantic layer / MetricFlow projects, also:
-pip install dbt-metricflow
+cd sample-projects
+mise trust          # first time only, if prompted
+mise run setup      # installs tools, creates .venv, runs uv sync
+mise run version
+```
 
+After changing dependencies in `pyproject.toml`:
+
+```bash
+mise run lock       # update uv.lock
+mise run sync       # uv sync into .venv
+```
+
+### Run a dbt project
+
+Each subfolder is an independent dbt project. With mise activated (`cd` into the repo or any subfolder), from that project directory:
+
+```bash
 dbt deps    # if the project uses packages
 dbt seed    # load CSV seeds (where applicable)
 dbt run
 dbt parse   # validates semantic manifest when MetricFlow is configured
 ```
+
+Per-project `requirements.txt` files are legacy upstream pins; use the root `pyproject.toml` / `uv.lock` unless you intentionally need an isolated venv.
+
+Enable automatic activation in your shell (once per machine):
+
+```bash
+echo 'eval "$(mise activate zsh)"' >> ~/.zshrc   # or bash/fish equivalent
+```
+
+After that, `cd` into any subfolder under this repo and `dbt`, `mf`, and `duckdb` are on your PATH.
 
 See each project’s own `README.md` for project-specific setup (data generation scripts, profiles, etc.).
 
@@ -117,6 +142,9 @@ Each subfolder retains its upstream `LICENSE` / `README` where provided. Refer t
 ```
 sample-projects/
 ├── README.md                          # this file
+├── mise.toml                          # shared Python 3.12 + uv + DuckDB CLI
+├── pyproject.toml                     # shared Python deps (dbt, MetricFlow)
+├── uv.lock                            # locked versions for uv sync
 ├── .gitignore
 ├── semantic-layer-online-course/
 ├── data-modeling-example/

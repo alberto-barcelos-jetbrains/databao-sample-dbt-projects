@@ -12,7 +12,7 @@ python.uv_venv_auto = true
 [env]
 _.python.venv = { path = ".venv", create = true }
 
-[tasks.deps]
+[tasks.sync]
 description = "Install or refresh Python dependencies with uv"
 run = "uv sync"
 
@@ -24,9 +24,9 @@ run = "uv lock"
 description = "Install mise tools, create .venv, and sync Python packages"
 run = [
   "mise install",
-  "mise run deps",
+  "mise run sync",
 ]
 
-[tasks.dbt-version]
+[tasks.version]
 description = "Show dbt, MetricFlow, and DuckDB versions"
 run = "dbt --version && mf --version && duckdb --version"
