@@ -35,8 +35,6 @@ dbt run
 dbt parse   # validates semantic manifest when MetricFlow is configured
 ```
 
-Per-project `requirements.txt` files are legacy upstream pins; use the root `pyproject.toml` / `uv.lock` unless you intentionally need an isolated venv.
-
 Enable automatic activation in your shell (once per machine):
 
 ```bash
