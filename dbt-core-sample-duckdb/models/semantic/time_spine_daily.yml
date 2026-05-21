@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: time_spine_daily
+    description: Daily time spine for MetricFlow, sourced from the date dimension (2000–2049).
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        description: Daily date key used as the standard granularity for MetricFlow time joins.
+        granularity: day

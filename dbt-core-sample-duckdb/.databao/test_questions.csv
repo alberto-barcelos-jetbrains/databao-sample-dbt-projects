@@ -1,0 +1,6 @@
+question,mf_query,metric,formula
+What is the total revenue generated per month?,mf query --metrics total_revenue --group-by metric_time__month,total_revenue,SUM(quantity * unit_sale_price)
+How many units were sold per product line over time?,mf query --metrics total_quantity_sold --group-by metric_time__month --group-by sale__product_line,total_quantity_sold,SUM(quantity)
+What is the average discount applied per order method per month?,mf query --metrics avg_unit_discount --group-by metric_time__month --group-by sale__order_method_type,avg_unit_discount,AVG(unit_price - unit_sale_price)
+How many distinct transactions occurred per retailer country each month?,mf query --metrics total_orders --group-by metric_time__month --group-by sale__retailer_country,total_orders,COUNT_DISTINCT(fct_sales_sk)
+What is the total revenue contributed by each retailer type over time?,mf query --metrics total_revenue --group-by metric_time__month --group-by sale__retailer_type,total_revenue,SUM(quantity * unit_sale_price)

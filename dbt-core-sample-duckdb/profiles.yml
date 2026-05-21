@@ -3,7 +3,7 @@ dbt_core_sample_duckdb:
   outputs:
     go_sales:
       type: duckdb
-      path: '/home/u0001/dbt-core-sample-duckdb/go_sales.db'
+      path: '/home/Alberto.Barcelos/Projects/jetbrains/sample-projects/dbt-core-sample-duckdb/go_sales.db'
   # target: dev
   # outputs:
   #   dev:

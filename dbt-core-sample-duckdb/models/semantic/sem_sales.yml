@@ -1,0 +1,95 @@
+version: 2
+
+semantic_models:
+  - name: sales
+    description: >
+      Semantic model for GO Sales transactions. Built on the flattened sales mart,
+      providing measures and dimensions for analyzing revenue, volume, and order
+      activity across products, retailers, order methods, and time.
+    model: ref('t_mrt_sales')
+
+    entities:
+      - name: sale
+        type: primary
+        expr: fct_sales_sk
+
+    dimensions:
+      - name: transaction_date
+        type: time
+        type_params:
+          time_granularity: day
+      - name: order_method_code
+        type: categorical
+      - name: order_method_type
+        type: categorical
+      - name: product_number
+        type: categorical
+      - name: product_line
+        type: categorical
+      - name: product_type
+        type: categorical
+      - name: product
+        type: categorical
+      - name: product_brand
+        type: categorical
+      - name: product_color
+        type: categorical
+      - name: retailer_code
+        type: categorical
+      - name: retailer_name
+        type: categorical
+      - name: retailer_country
+        type: categorical
+      - name: retailer_type
+        type: categorical
+
+    measures:
+      - name: revenue
+        description: Revenue per transaction row, calculated as quantity times unit sale price.
+        agg: sum
+        expr: quantity * unit_sale_price
+        agg_time_dimension: transaction_date
+      - name: quantity_sold
+        description: Number of units sold per transaction row.
+        agg: sum
+        expr: quantity
+        agg_time_dimension: transaction_date
+      - name: sale_count
+        description: Count of distinct sales transactions.
+        agg: count_distinct
+        expr: fct_sales_sk
+        agg_time_dimension: transaction_date
+      - name: unit_discount
+        description: Discount per unit, calculated as list price minus sale price.
+        agg: average
+        expr: unit_price - unit_sale_price
+        agg_time_dimension: transaction_date
+
+metrics:
+  - name: total_revenue
+    label: Total Revenue
+    description: Total revenue generated from sales, calculated as the sum of quantity times unit sale price across all transactions.
+    type: simple
+    type_params:
+      measure: revenue
+
+  - name: total_quantity_sold
+    label: Total Quantity Sold
+    description: Total number of units sold across all transactions.
+    type: simple
+    type_params:
+      measure: quantity_sold
+
+  - name: total_orders
+    label: Total Orders
+    description: Total number of distinct sales transactions.
+    type: simple
+    type_params:
+      measure: sale_count
+
+  - name: avg_unit_discount
+    label: Average Unit Discount
+    description: Average discount per unit (list price minus sale price) across transactions.
+    type: simple
+    type_params:
+      measure: unit_discount
