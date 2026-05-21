@@ -64,6 +64,11 @@ semantic_models:
         agg: average
         expr: unit_price - unit_sale_price
         agg_time_dimension: transaction_date
+      - name: discount_amount
+        description: Total discount amount per transaction row (list price minus sale price).
+        agg: sum
+        expr: unit_price - unit_sale_price
+        agg_time_dimension: transaction_date
 
 metrics:
   - name: total_revenue
@@ -93,3 +98,30 @@ metrics:
     type: simple
     type_params:
       measure: unit_discount
+
+  - name: avg_revenue_per_order
+    label: Average Revenue per Order
+    description: Average revenue per order, calculated as total revenue divided by total number of distinct orders.
+    type: derived
+    type_params:
+      expr: total_revenue / total_orders
+      metrics:
+        - name: total_revenue
+        - name: total_orders
+
+  - name: total_discount_amount
+    label: Total Discount Amount
+    description: Total discount given across all transactions (sum of list price minus sale price).
+    type: simple
+    type_params:
+      measure: discount_amount
+
+  - name: avg_quantity_per_order
+    label: Average Quantity per Order
+    description: Average number of units per order, calculated as total quantity sold divided by total distinct orders.
+    type: derived
+    type_params:
+      expr: total_quantity_sold / total_orders
+      metrics:
+        - name: total_quantity_sold
+        - name: total_orders
