@@ -35,8 +35,6 @@ dbt run
 dbt parse   # validates semantic manifest when MetricFlow is configured
 ```
 
-Per-project `requirements.txt` files are legacy upstream pins; use the root `pyproject.toml` / `uv.lock` unless you intentionally need an isolated venv.
-
 Enable automatic activation in your shell (once per machine):
 
 ```bash
@@ -56,15 +54,6 @@ See each project’s own `README.md` for project-specific setup (data generation
 | [`dbt-core-sample-duckdb/`](dbt-core-sample-duckdb/) | 11 | **None** | Full generation on retail star schema (IBM GO Sales) |
 | [`dbt-ecommerce-analytics/`](dbt-ecommerce-analytics/) | 6 | **None** | Smaller baseline; synthetic data + data-quality edge cases |
 | [`motherduck-metricflow-example/`](motherduck-metricflow-example/) | 2 | **Complete** | Smoke test / golden path for MetricFlow + DuckDB |
-
-### Recommended benchmark scenarios
-
-| Scenario | Use this project |
-|----------|------------------|
-| Partial metrics (semantic model exists, metrics missing) | Add your own `test-shopify`-style project, or extend `semantic-layer-online-course` |
-| Staging without semantic, marts with rich semantic | `semantic-layer-online-course` |
-| Generate entire semantic layer (~medium scale) | `data-modeling-example` or `dbt-core-sample-duckdb` |
-| Minimal MetricFlow correctness check | `motherduck-metricflow-example/metricflow-example/ecommerce_metrics/` |
 
 ---
 
@@ -116,22 +105,6 @@ See each project’s own `README.md` for project-specific setup (data generation
 - **Agent use case:** Validate MetricFlow install and query path; **not** suitable for generation benchmarks (too few models).
 
 ---
-
-## What makes a good semantic-generation benchmark
-
-| Signal | Why it matters |
-|--------|----------------|
-| **8–20 SQL models** | Enough joins and grains without huge repos |
-| **Mixed coverage** | Some models with semantic definitions, some without |
-| **Incomplete semantic** | e.g. measures defined but no `metrics:` block |
-| **DuckDB + seeds** | Runnable locally, easy to ship in CI |
-| **YAML format variety** | Modern `semantic_models:` files vs legacy `semantic_model:` under `models:` |
-
-## Adding `test-shopify` (optional)
-
-A local **Shopify analytics** project (`test-shopify`) was previously used as the best **partial-coverage** benchmark (DuckDB, 5 staging models, MetricFlow semantic models with metrics on most entities, **`sem_products` missing metrics**). It is not vendored here because it was not tied to a public upstream repository.
-
-To add it: copy your project into `test-shopify/`, ensure there is **no** `.git` directory inside, and commit from this repo root.
 
 ## Upstream licenses
 
