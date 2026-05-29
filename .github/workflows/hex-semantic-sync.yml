@@ -1,0 +1,61 @@
+name: Hex Semantic Project Ingest
+on: # This configures when this workflow will be triggered. This can be further customized to only run when certain files change, etc.
+  pull_request: # Run on every pull request
+  push: # Run on every push to the main or master branch.
+    branches:
+      - main
+      - master
+env:
+  TOKEN: ${{ secrets.HEX_SEMANTIC_INGEST_TOKEN }}
+  # The top level directory containing your MetricFlow files.
+  # By default this is your entire repository, but you can update this is you only want to zip a specific subdirectory.
+  DIRECTORY: .
+jobs:
+  hex-semantic-project-ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify token
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "❌ Error: TOKEN not found. Please make sure the secret referenced in your workflow file exists in your repository."
+            exit 1
+          else
+            echo "Token exists, proceeding..."
+          fi
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Zip up files
+        run: |
+          cd $DIRECTORY
+          zip -r repo.zip .
+      - name: Ingest Semantic Project
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          response=$(curl -s -w "%{http_code}" -o response.txt -X POST \
+            -F "data=@$DIRECTORY/repo.zip" \
+            https://app.hex.tech/api/v1/semantic-projects/019e7361-e544-7446-93b8-4a359b8fadfd/ingest \
+            -H "Authorization: Bearer $TOKEN")
+          if [ "$response" -eq 201 ]; then
+            echo "✅ Successfully ingested semantic project"
+            cat response.txt | jq 'del(.debug)'
+          else
+            echo "❌ Failed to ingest semantic project"
+            cat response.txt
+            exit 1
+          fi
+      - name: Ingest Semantic Project (dry run)
+        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+        run: |
+          response=$(curl -s -w "%{http_code}" -o response.txt -X POST \
+            -F "data=@$DIRECTORY/repo.zip" \
+            -F "dryRun=true" \
+            https://app.hex.tech/api/v1/semantic-projects/019e7361-e544-7446-93b8-4a359b8fadfd/ingest \
+            -H "Authorization: Bearer $TOKEN")
+          if [ "$response" -eq 201 ]; then
+            echo "✅ Successfully ingested semantic project"
+            cat response.txt | jq 'del(.debug)'
+          else
+            echo "❌ Failed to ingest semantic project"
+            cat response.txt
+            exit 1
+          fi
